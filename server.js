@@ -32,9 +32,6 @@ io.on('connection', (socket) => {
 
     socket.emit('connection', 'new is logged in');
 
-    socket.on('event', function(data) {
-        console.log('A client sent us this dumb message:', data.message);
-
     socket.on('userMsgReceived', function(data) {
             console.log('got msg from a user:', data.msg);
             //io makes sure that all sessions to the websocket wil be updated
@@ -42,8 +39,6 @@ io.on('connection', (socket) => {
         });    
     });
 
-    
-});
 
 
 
