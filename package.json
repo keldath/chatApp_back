@@ -1,6 +1,28 @@
 {
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^5.22.3",
     "socket.io": "^4.0.0"
-  }
+  },
+  "scripts": {
+    "start": "nodemon node server.js"
+  },
+  "name": "chatapp_back",
+  "description": "",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keldath/chatApp_back.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/keldath/chatApp_back/issues"
+  },
+  "homepage": "https://github.com/keldath/chatApp_back#readme"
 }
