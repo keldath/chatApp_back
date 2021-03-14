@@ -51,10 +51,49 @@ const Users = sequelize.define('Users',
     // Other model options go here
   });
 
+const Chatmsg = sequelize.define('chat',
+    {
+    userNick: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      msg: {
+        type: DataTypes.STRING
+      },
+      createon: {
+        type: DataTypes.DATE
+      }
+    },
+    {
+    timestamps: true,
+    createdAt: 'createon',
+    freezeTableName: true,
+    tableName: 'DIM_CHAT_MSG'
+    } , {
+    // Other model options go here
+});
+
+
 //init the table model
 (async () => {
     await sequelize.sync();       
 })() 
+
+
+//validate user and pwd or create new user if not exists
+//gotta adda code for deleting rows above 10...
+const getmsgs = async (socket) => {
+    const result = await Chatmsg.findAll({
+            limit : 10
+        });
+    let list = Object.values(result)
+    console.log('sagi'+list[2].userNick)
+    socket.emit('sendlastmsg',list )
+};
+
+const insertmsgchat = async (sender,msg,createon) => {
+    await Chatmsg.create({ userNick: sender, msg: msg, createon: createon});   
+}
 
 //validate user and pwd or create new user if not exists
 const findusers = async (name,pwd,socket) => {
@@ -63,7 +102,7 @@ const findusers = async (name,pwd,socket) => {
                 userNick: name
               }
             });
-        let res = await JSON.stringify(result, null, 2)
+        let res = /*await*/ JSON.stringify(result, null, 2)
         // console.log(res);
         // console.log(res.length)
         // console.log('this is res ' + result[0])
@@ -131,11 +170,15 @@ io.on('connection', (socket) => {
             console.log('got msg from a user:', data.msg);
             //io makes sure that all sessions to the websocket wil be updated
             io.emit('userMsgReceived',data.msg,data.sender,timeformat())
+            insertmsgchat(data.sender,data.msg,timeformat())
     }); 
 
     socket.on('logintochat', function(data) {
         findusers(data.name,data.pwd,socket) 
-       
+        getmsgs(socket)
+    }) 
+    socket.on('displaylastmsg', function() {
+        getmsgs(socket)
     })   
 
 });  
