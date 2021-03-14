@@ -65,32 +65,39 @@ const findusers = async (name,pwd,socket) => {
             });
         let res = await JSON.stringify(result, null, 2)
         // console.log(res);
-        // console.log('this is pwd ' + pwd)
-        // console.log('this is res ' + result[0].auth)
+        // console.log(res.length)
+        // console.log('this is res ' + result[0])
         // console.log('this is check' + result[0].auth !== pwd)
         // console.log('this is name ' + name)
         // console.log('this is userNick' + result[0].userNick)
         // console.log('this is check2' + result[0].userNick == name)
-
-        if(res.length > 0 && result[0].auth == pwd) {
-            msg = 'login succesful'
-            socket.emit('loginsucces',msg)
+        //   res.length > 2 iknow...to hard coded...bad practice...
+        if(res.length > 2 && result[0].auth == pwd) {
+            socket.emit('loginsucces',name)
         }
-        else if (res.length != 0 && result[0].auth !== pwd && result[0].userNick == name) {
-            msg = 'Password is incorrect'
-            socket.emit('logintochaterr',msg)
+        else if (res.length > 2 && result[0].auth !== pwd && result[0].userNick == name) {
+            socket.emit('logintochaterr')
         }  
         else {
-            console.log(name);
-
             (async (name,pwd) => {
                 await Users.create({ userNick: name, auth: pwd });
-                msg = 'new user created succesfully'
-                socket.emit('newusercreated',msg)    
+                socket.emit('newusercreated',name)    
             })(name,pwd)    
         }     
 };
 
+function timeformat () {
+  
+    let date_ob = new Date();
+    let date = ("0" + date_ob.getDate()).slice(-2);
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    let year = date_ob.getFullYear();
+    let hours = date_ob.getHours();
+    let minutes = date_ob.getMinutes();
+    let seconds = date_ob.getSeconds();
+    return (year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
+  
+}
 /////websocket init
 
 //setting up the socket + cors handler
@@ -123,7 +130,7 @@ io.on('connection', (socket) => {
     socket.on('userMsgReceived', function(data) {
             console.log('got msg from a user:', data.msg);
             //io makes sure that all sessions to the websocket wil be updated
-            io.emit('userMsgReceived',data.msg)
+            io.emit('userMsgReceived',data.msg,data.sender,timeformat())
     }); 
 
     socket.on('logintochat', function(data) {
