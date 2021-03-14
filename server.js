@@ -96,7 +96,7 @@ const insertmsgchat = async (sender,msg,createon) => {
 }
 
 //validate user and pwd or create new user if not exists
-const findusers = async (name,pwd,socket) => {
+const findusers = async (name,pwd,socket,userlist) => {
         const result = await Users.findAll({
             where: {
                 userNick: name
@@ -111,7 +111,12 @@ const findusers = async (name,pwd,socket) => {
         // console.log('this is userNick' + result[0].userNick)
         // console.log('this is check2' + result[0].userNick == name)
         //   res.length > 2 iknow...to hard coded...bad practice...
-        if(res.length > 2 && result[0].auth == pwd) {
+
+        if (userlist != {} && userlist != [] && userlist != undefined && userlist.includes(name)) {
+            //no double users allowed
+            socket.emit('logintochaterr')
+        }
+        else if(res.length > 2 && result[0].auth == pwd) {
             socket.emit('loginsucces',name)
         }
         else if (res.length > 2 && result[0].auth !== pwd && result[0].userNick == name) {
@@ -159,6 +164,8 @@ app.get('/', function (req, res) {
     res.send('welcome to the chat backend server');
 })
 
+let userlist = new Set();
+let list = [];
 //init ws to all connections and listed to any new connection
 io.on('connection', (socket) => { 
     /* socket object may be used to send specific 
@@ -174,13 +181,20 @@ io.on('connection', (socket) => {
     }); 
 
     socket.on('logintochat', function(data) {
-        findusers(data.name,data.pwd,socket) 
+        list = [...userlist]
+        findusers(data.name,data.pwd,socket,list) 
         getmsgs(socket)
     }) 
     socket.on('displaylastmsg', function() {
         getmsgs(socket)
     })   
-
+    socket.on('updateuserlist', function(data) {
+        //io makes sure that all sessions to the websocket wil be updated
+        //update users list for all
+        list = [...userlist.add(data)] //seems the set is causing react front an iter issue
+        console.log(list)
+        io.emit('updateuserlistall',list)
+        }); 
 });  
 
 
