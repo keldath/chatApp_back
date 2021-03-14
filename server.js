@@ -112,7 +112,9 @@ const findusers = async (name,pwd,socket,userlist) => {
         // console.log('this is check2' + result[0].userNick == name)
         //   res.length > 2 iknow...to hard coded...bad practice...
 
-        if (userlist != {} && userlist != [] && userlist != undefined && userlist.includes(name)) {
+        if (userlist != {} && userlist != [] && userlist != undefined 
+           // && userlist != ''
+            && userlist.includes(name)) {
             //no double users allowed
             socket.emit('logintochaterr')
         }
