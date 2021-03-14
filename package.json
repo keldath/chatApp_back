@@ -24,5 +24,6 @@
   "bugs": {
     "url": "https://github.com/keldath/chatApp_back/issues"
   },
-  "homepage": "https://github.com/keldath/chatApp_back#readme"
+  "homepage": "https://github.com/keldath/chatApp_back#readme",
+  "devDependencies": {}
 }
