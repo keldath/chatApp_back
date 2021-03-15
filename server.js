@@ -62,6 +62,9 @@ const Chatmsg = sequelize.define('chat',
       },
       createon: {
         type: DataTypes.DATE
+      },
+      avatar: {
+        type: DataTypes.STRING
       }
     },
     {
@@ -90,8 +93,8 @@ const getmsgs = async (socket) => {
     socket.emit('sendlastmsg',list )
 };
 
-const insertmsgchat = async (sender,msg,createon) => {
-    await Chatmsg.create({ userNick: sender, msg: msg, createon: createon});   
+const insertmsgchat = async (sender,msg,createon,avatar) => {
+    await Chatmsg.create({ userNick: sender, msg: msg, createon: createon,avatar: avatar});   
 }
 
 //validate user and pwd or create new user if not exists
@@ -168,6 +171,7 @@ app.get('/', function (req, res) {
 
 
 let userDict = {};//sto0re user name and socker id so i can remove logged out users.
+let userDictavatar = {};
 //init ws to all connections and listed to any new connection
 io.on('connection', (socket) => { 
     
@@ -179,8 +183,8 @@ io.on('connection', (socket) => {
     socket.on('userMsgReceived', function(data) {
             console.log('got msg from a user:', data.msg);
             //io makes sure that all sessions to the websocket wil be updated
-            io.emit('userMsgReceived',data.msg,data.sender,timeformat())
-            insertmsgchat(data.sender,data.msg,timeformat())
+            io.emit('userMsgReceived',data.msg,data.sender,timeformat(),data.avatar)
+            insertmsgchat(data.sender,data.msg,timeformat(),data.avatar)
     }); 
 
     socket.on('logintochat', function(data) {
@@ -198,19 +202,26 @@ io.on('connection', (socket) => {
         //io makes sure that all sessions to the websocket wil be updated
         //update users list for all
        // list = [...userlist.add(data)] //seems the set is causing react front an iter issue
-        userDict[data] = socket.conn.id
-        let list = Object.keys(userDict);
-        console.log(list)
-        io.emit('updateuserlistall',list)
+        console.log('update user list')
+        userDict[data[0]] = socket.conn.id
+        //let list = Object.keys(userDict);
+        userDictavatar[data[0]] = data[1]
+        //let list = Object.keys(userDictavatar);
+        //console.log(list)
+        console.log(userDictavatar)
+        io.emit('updateuserlistall',userDictavatar/*list*/)
         }); 
 
     socket.on('disconnect', ()=>{
         console.log(socket.conn.id)
         let newdict = {...userDict};
+        let newdictavatar = {...userDictavatar}
         userDict = {};
+        userDictavatar = {};
         Object.keys(newdict).forEach((item2,idx2)=>{
             if (newdict[item2] !== socket.conn.id) {
                 userDict = {...newdict , item2: newdict[item2]}
+                userDictavatar = {...newdictavatar, item2: newdictavatar[item2]}
             }
         } ) 
         console.log('Got disconnect!');
