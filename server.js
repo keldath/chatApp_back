@@ -87,7 +87,10 @@ const Chatmsg = sequelize.define('chat',
 //gotta adda code for deleting rows above 10...
 const getmsgs = async (socket) => {
     const result = await Chatmsg.findAll({
-            limit : 10
+            limit : 10,
+            order:  [
+                ['id', 'DESC']
+            ],
         });
     let list = Object.values(result)
     socket.emit('sendlastmsg',list )
@@ -114,10 +117,17 @@ const findusers = async (name,pwd,socket,userlist) => {
         // console.log('this is check2' + result[0].userNick == name)
         // console.log('this is userlist ' +userlist)
         //   res.length > 2 iknow...to hard coded...bad practice...
-
-        if (userlist != {} && userlist != [] && userlist != undefined 
-            && name != ''
-            && userlist.includes(name)) {
+        
+        //tried to make sure only one session exists. cancelled for now.
+        // if (userlist != {} && userlist != [] && userlist != undefined 
+        //     && name != ''
+        //     && userlist.includes(name)) {
+        //     //no double users allowed
+        //     socket.emit('logintochaterr')
+        // }
+        if (userlist === {} || userlist === [] || userlist === undefined 
+            || name === ''
+           ) {
             //no double users allowed
             socket.emit('logintochaterr')
         }
@@ -191,7 +201,8 @@ io.on('connection', (socket) => {
         //list = [...userlist]
         //userDict = 
         let list = Object.keys(userDict);
-        findusers(data.name,data.pwd,socket,list) 
+        findusers(data.name,data.pwd,socket,list)
+        console.log(getmsgs(socket) )
         getmsgs(socket)
     }) 
     socket.on('displaylastmsg', function() {
@@ -220,8 +231,8 @@ io.on('connection', (socket) => {
         userDictavatar = {};
         Object.keys(newdict).forEach((item2,idx2)=>{
             if (newdict[item2] !== socket.conn.id) {
-                userDict = {...newdict , item2: newdict[item2]}
-                userDictavatar = {...newdictavatar, item2: newdictavatar[item2]}
+                userDict = {...newdict , [item2]: newdict[item2]}
+                userDictavatar = {...newdictavatar, [item2]: newdictavatar[item2]}
             }
         } ) 
         console.log('Got disconnect!');
