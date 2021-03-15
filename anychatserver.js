@@ -8,8 +8,8 @@ const Sequelize = require('sequelize');
 
 //html welcome to the back server - not used...
 app.get('/', function (req, res) {
-    res.send('welcome to the chat backend server');
-//})
+     res.send('welcome to the chat backend server'); 
+})
     const http = server.createServer(app);
     const PORT = 8080;
     const sequelize = new Sequelize(
@@ -221,6 +221,6 @@ app.get('/', function (req, res) {
          }); 
     });  
   //  res.send('welcome to the chat backend server');
-})
+//})
 
 //exports.app = functions.https.onRequest(app);
