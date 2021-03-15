@@ -87,7 +87,6 @@ const getmsgs = async (socket) => {
             limit : 10
         });
     let list = Object.values(result)
-    console.log('sagi'+list[2].userNick)
     socket.emit('sendlastmsg',list )
 };
 
@@ -108,12 +107,13 @@ const findusers = async (name,pwd,socket,userlist) => {
         // console.log('this is res ' + result[0])
         // console.log('this is check' + result[0].auth !== pwd)
         // console.log('this is name ' + name)
-        // console.log('this is userNick' + result[0].userNick)
+        // console.log('this is userNick ' + result[0].userNick)
         // console.log('this is check2' + result[0].userNick == name)
+        // console.log('this is userlist ' +userlist)
         //   res.length > 2 iknow...to hard coded...bad practice...
 
         if (userlist != {} && userlist != [] && userlist != undefined 
-           // && userlist != ''
+            && name != ''
             && userlist.includes(name)) {
             //no double users allowed
             socket.emit('logintochaterr')
@@ -166,10 +166,11 @@ app.get('/', function (req, res) {
     res.send('welcome to the chat backend server');
 })
 
-let userlist = new Set();
-let list = [];
+
+let userDict = {};//sto0re user name and socker id so i can remove logged out users.
 //init ws to all connections and listed to any new connection
 io.on('connection', (socket) => { 
+    
     /* socket object may be used to send specific 
     messages to the new connected client */
     console.log('new User Logged');
@@ -183,20 +184,39 @@ io.on('connection', (socket) => {
     }); 
 
     socket.on('logintochat', function(data) {
-        list = [...userlist]
+        //list = [...userlist]
+        //userDict = 
+        let list = Object.keys(userDict);
         findusers(data.name,data.pwd,socket,list) 
         getmsgs(socket)
     }) 
     socket.on('displaylastmsg', function() {
         getmsgs(socket)
     })   
+    
     socket.on('updateuserlist', function(data) {
         //io makes sure that all sessions to the websocket wil be updated
         //update users list for all
-        list = [...userlist.add(data)] //seems the set is causing react front an iter issue
+       // list = [...userlist.add(data)] //seems the set is causing react front an iter issue
+        userDict[data] = socket.conn.id
+        let list = Object.keys(userDict);
         console.log(list)
         io.emit('updateuserlistall',list)
         }); 
+
+    socket.on('disconnect', ()=>{
+        console.log(socket.conn.id)
+        let newdict = {...userDict};
+        userDict = {};
+        Object.keys(newdict).forEach((item2,idx2)=>{
+            if (newdict[item2] !== socket.conn.id) {
+                userDict = {...newdict , item2: newdict[item2]}
+            }
+        } ) 
+        console.log('Got disconnect!');
+        //remove from the list of connected
+        io.emit('updateuserlist')
+     }); 
 });  
 
 
