@@ -142,8 +142,8 @@ function timeformat () {
 //setting up the socket + cors handler
 const io = socketio(http, 
     {cors: {   
-            origin: "http://localhost:3000",
-           // origin: "https://anychat-9b81b.web.app",
+            //origin: "http://localhost:3000",
+            origin: "https://anychat-9b81b.web.app",
             methods: ["GET", "POST"],
             credentials: true
            }
@@ -161,6 +161,7 @@ io.on('connection', (socket) => {
     messages to the new connected client */
     console.log('new User Logged');
     socket.emit('connection', 'new is logged in');
+
     socket.on('userMsgReceived', function(data) {
             console.log('got msg from a user:', data.msg);
             //io makes sure that all sessions to the websocket wil be updated
@@ -193,13 +194,16 @@ io.on('connection', (socket) => {
         userDictavatar = {};
         Object.keys(newdict).forEach((item2,idx2)=>{
             if (newdict[item2] !== socket.conn.id) {
-                userDict = {...newdict , [item2]: newdict[item2]}
-                userDictavatar = {...newdictavatar, [item2]: newdictavatar[item2]}
+                userDict = {...userDict , [item2]: newdict[item2]}
+                userDictavatar = {...userDictavatar, [item2]: newdictavatar[item2]}
+                //userDict[item2] = newdict[item2]
+               // userDictavatar[item2] = newdictavatar[item2]
             }
         } ) 
         console.log('Got disconnect!');
         //remove from the list of connected
-        io.emit('updateuserlist')
+        //io.emit('updateuserlist')
+        io.emit('updateuserlistall',userDictavatar/*list*/)
      }); 
 });  
   //  res.send('welcome to the chat backend server');
