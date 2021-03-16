@@ -107,7 +107,11 @@ const findusers = async (name,pwd,socket,userlist) => {
             });
         let res =  JSON.stringify(result, null, 2)
         
-        if (userlist === {} || userlist === [] || userlist === undefined 
+        var regex = new RegExp("^[a-zA-Z0-9]+$");
+        if (!regex.test(name) || !regex.test(pwd)) {
+            socket.emit('logintochaterr')
+        }
+        else if (userlist === {} || userlist === [] || userlist === undefined 
             || name === ''
            ) {
             //no double users allowed
