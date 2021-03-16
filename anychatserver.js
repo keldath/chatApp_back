@@ -11,13 +11,14 @@ app.get('/', function (req, res) {
      res.send('welcome to the chat backend server'); 
 })
 const http = server.createServer(app);
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;//herruku issue needed the env.PORT
 const sequelize = new Sequelize(
     'sql11398320','sql11398320','5Iw6QEW76g',{
   host: 'sql11.freemysqlhosting.net',
   dialect: 'mysql',
   storage: 'sql11398320'
 });
+//http://www.phpmyadmin.co/sql.php?server=1&db=sql11398320&table=DIM_CHAT_MSG&pos=0
 const DataTypes = require('sequelize/lib/data-types');
 module.exports = sequelize;
 global.sequelize = sequelize;
@@ -141,8 +142,8 @@ function timeformat () {
 //setting up the socket + cors handler
 const io = socketio(http, 
     {cors: {   
-            //origin: "http://localhost:3000",
-            origin: "https://anychat-9b81b.web.app",
+            origin: "http://localhost:3000",
+           // origin: "https://anychat-9b81b.web.app",
             methods: ["GET", "POST"],
             credentials: true
            }
